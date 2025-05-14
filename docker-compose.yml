@@ -1,0 +1,141 @@
+version: '3'
+services:
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+    expose:
+      - "9411"
+  postgres:
+    image: postgres
+    container_name: postgres
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: auth
+    ports:
+      - "5432:5432"
+    expose:
+      - "5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  registry:
+    image: registry:latest
+    container_name: registry
+    ports:
+      - "8761:8761"
+    expose:
+      - "8761"
+#    environment:
+#      - SPRING_PROFILES_ACTIVE=docker
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8761/actuator/health" ]
+#    depends_on:
+#      zipkin:
+#        condition: service_healthy
+  config:
+    image: config:latest
+    container_name: config
+    ports:
+      - "9196:9196"
+    expose:
+      - "9196"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9196/actuator/health" ]
+#    depends_on:
+#      registry:
+#        condition: service_healthy
+  authentication:
+    image: authentication:latest
+    container_name: authentication
+    ports:
+      - "9193:9193"
+    expose:
+      - "9193"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+#    depends_on:
+#      config:
+#        condition: service_healthy
+  payment:
+    image: payment:latest
+    container_name: payment
+    restart: always
+    ports:
+      - "9191:9191"
+    expose:
+      - "9191"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_ZIPKIN_BASE-URL=http://zipkin:9411
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9191/actuator/health" ]
+#    depends_on:
+#      config:
+#        condition: service_healthy
+
+  order:
+    image: order:latest
+    container_name: order
+    ports:
+      - "9192:9192"
+    expose:
+      - "9192"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9192/actuator/health" ]
+#    depends_on:
+#      payment:
+#        condition: service_healthy
+
+  gateway:
+    image: gateway:latest
+    container_name: gateway
+    ports:
+      - "8989:8989"
+    expose:
+      - "8989"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+#      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY= TRACE
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8989/actuator/health" ]
+#    depends_on:
+#      order:
+#        condition: service_healthy
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      #      - "--storage.tsdb.retention=31d"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+volumes:
+  postgres_data:
+    driver: local
+  grafana-data:
+  prometheus_data:

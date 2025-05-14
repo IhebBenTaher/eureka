@@ -1,0 +1,5 @@
+realm name: microservice
+client name: microservice-auth
+client secret: Nk3HtxM05MveiA7YQPavvrEDYdFfmwOQ
+isuser: http://localhost:9090/realms/microservice
+endpoint: http://localhost:9090/realms/microservice/protocol/openid-connect/token
