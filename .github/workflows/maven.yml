@@ -38,6 +38,7 @@ jobs:
       - name: Build and push Docker image
         run: |
           cd ${{ matrix.service }}
+          chmod +x ./mvnw
           ./mvnw clean package -DskipTests
           docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest .
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest
