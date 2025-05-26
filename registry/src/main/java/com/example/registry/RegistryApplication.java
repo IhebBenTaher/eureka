@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 @EnableEurekaServer
 @RestController
 public class RegistryApplication {
-	@GetMapping
+	@GetMapping("/hello")
 	public String hello(){
 		return "hello from registry";
 	}
