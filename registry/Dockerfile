@@ -1,3 +1,3 @@
 FROM openjdk:17
-COPY target/*.jar app.jar
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+COPY target/registry.jar registry.jar
+ENTRYPOINT ["java", "-jar", "/registry.jar"]
