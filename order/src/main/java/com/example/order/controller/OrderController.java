@@ -23,6 +23,6 @@ public class OrderController {
     }
     @GetMapping("/book")
     public String bookOrder() {
-        return "book call";
+        return "book call v2";
     }
 }
