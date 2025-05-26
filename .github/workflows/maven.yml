@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [registry]
+        service: [registry, authentication]
 
     steps:
       - name: Checkout code

@@ -1,3 +1,3 @@
 FROM openjdk:17
-COPY target/*.jar app.jar
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+COPY target/authentication.jar authentication.jar
+ENTRYPOINT ["java", "-jar", "/authentication.jar"]
